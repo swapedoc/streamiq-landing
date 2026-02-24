@@ -1,0 +1,899 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
+<!-- SEO -->
+<title>StreamIQ — Know What's Worth Watching on Indian OTT</title>
+<meta name="description" content="StreamIQ tracks Netflix, Prime Video, JioHotstar & more — scoring titles from YouTube reviews, Reddit & Rotten Tomatoes. Filter by Hindi dub. Free, live, no signup."/>
+<meta name="keywords" content="streaming tracker india, what to watch netflix india, hindi dub filter, ott india, best movies streaming india, prime video india, jiohotstar"/>
+<meta name="author" content="StreamIQ"/>
+<meta name="robots" content="index, follow"/>
+<link rel="canonical" href="https://streamiq.in/"/>
+
+<!-- Open Graph -->
+<meta property="og:type" content="website"/>
+<meta property="og:title" content="StreamIQ — Know What's Worth Watching"/>
+<meta property="og:description" content="AI-scored streaming tracker for Indian OTT. Netflix, Prime, JioHotstar. Hindi dub filter. No signup needed."/>
+<meta property="og:url" content="https://streamiq.in/"/>
+<meta property="og:site_name" content="StreamIQ"/>
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:title" content="StreamIQ — Know What's Worth Watching"/>
+<meta name="twitter:description" content="AI-scored streaming tracker for Indian OTT. Filter by platform, Hindi dub, genre. Live data, no signup."/>
+
+<!-- Schema.org structured data -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "StreamIQ",
+  "description": "AI-powered streaming tracker for Indian OTT platforms. Scores titles from YouTube, Reddit and Rotten Tomatoes reviews.",
+  "url": "https://movietracker-swapriya.streamlit.app/",
+  "applicationCategory": "EntertainmentApplication",
+  "operatingSystem": "Web",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "INR" },
+  "featureList": [
+    "Real-time OTT tracking for Netflix, Prime Video, JioHotstar",
+    "AI sentiment scoring from YouTube and Reddit",
+    "Hindi dub filter",
+    "Genre and platform filters",
+    "Direct streaming links"
+  ]
+}
+</script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Syne:wght@400;500;700;800&family=Syne+Mono&display=swap" rel="stylesheet"/>
+
+<style>
+:root {
+  --v0: #07070A;
+  --v1: #0C0C10;
+  --v2: #111116;
+  --v3: #18181F;
+  --v4: #222230;
+  --gold: #E8C547;
+  --gold2: #F5D76E;
+  --gold-g: rgba(232,197,71,0.07);
+  --t-bright: #F5F5F0;
+  --t-mid: #B0B0C0;
+  --t-dim: #606070;
+  --serif: 'DM Serif Display', Georgia, serif;
+  --sans: 'Syne', sans-serif;
+  --mono: 'Syne Mono', monospace;
+  --ease: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 16px; scroll-behavior: smooth; -webkit-font-smoothing: antialiased; }
+
+body {
+  background: var(--v0);
+  color: var(--t-mid);
+  font-family: var(--sans);
+  overflow-x: hidden;
+}
+
+/* grain overlay */
+body::after {
+  content: '';
+  position: fixed; inset: 0; z-index: 0; pointer-events: none; opacity: 0.03;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 256px;
+}
+
+::-webkit-scrollbar { width: 2px; }
+::-webkit-scrollbar-thumb { background: var(--v4); }
+
+/* ── NAV ── */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 20px 48px;
+  background: linear-gradient(to bottom, rgba(7,7,10,0.95) 0%, transparent 100%);
+  backdrop-filter: blur(8px);
+}
+.nav-logo {
+  font-family: var(--serif);
+  font-size: 1.4rem;
+  color: var(--t-bright);
+  text-decoration: none;
+  letter-spacing: -0.02em;
+}
+.nav-logo span { color: var(--gold); }
+.nav-cta {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 10px 24px;
+  background: var(--gold);
+  color: var(--v0);
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  text-decoration: none;
+  font-weight: 600;
+  transition: opacity 0.2s;
+}
+.nav-cta:hover { opacity: 0.85; }
+
+/* ── HERO ── */
+.hero {
+  min-height: 100vh;
+  display: flex; flex-direction: column; justify-content: center;
+  padding: 120px 48px 80px;
+  position: relative;
+  overflow: hidden;
+}
+
+.hero-bg {
+  position: absolute; inset: 0; z-index: 0;
+  background:
+    radial-gradient(ellipse 60% 50% at 70% 50%, rgba(232,197,71,0.06) 0%, transparent 70%),
+    radial-gradient(ellipse 40% 60% at 20% 80%, rgba(0,180,255,0.04) 0%, transparent 60%);
+}
+
+/* animated grid lines */
+.hero-grid {
+  position: absolute; inset: 0; z-index: 0; opacity: 0.04;
+  background-image:
+    linear-gradient(var(--gold) 1px, transparent 1px),
+    linear-gradient(90deg, var(--gold) 1px, transparent 1px);
+  background-size: 80px 80px;
+  mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 0%, transparent 100%);
+}
+
+.hero-tag {
+  font-family: var(--mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 28px;
+  opacity: 0;
+  animation: fadeUp 0.8s var(--ease) 0.2s forwards;
+  position: relative; z-index: 1;
+}
+.hero-tag::before {
+  content: '';
+  display: inline-block;
+  width: 24px; height: 1px;
+  background: var(--gold);
+  vertical-align: middle;
+  margin-right: 12px;
+}
+
+.hero-h1 {
+  font-family: var(--serif);
+  font-size: clamp(3rem, 7vw, 6.5rem);
+  line-height: 1.0;
+  letter-spacing: -0.03em;
+  color: var(--t-bright);
+  max-width: 800px;
+  margin-bottom: 32px;
+  opacity: 0;
+  animation: fadeUp 0.9s var(--ease) 0.35s forwards;
+  position: relative; z-index: 1;
+}
+.hero-h1 em {
+  font-style: italic;
+  color: var(--gold);
+}
+
+.hero-sub {
+  font-size: 1.1rem;
+  line-height: 1.7;
+  color: var(--t-mid);
+  max-width: 520px;
+  margin-bottom: 48px;
+  opacity: 0;
+  animation: fadeUp 0.9s var(--ease) 0.5s forwards;
+  position: relative; z-index: 1;
+}
+
+.hero-actions {
+  display: flex; align-items: center; gap: 24px; flex-wrap: wrap;
+  opacity: 0;
+  animation: fadeUp 0.9s var(--ease) 0.65s forwards;
+  position: relative; z-index: 1;
+}
+
+.btn-primary {
+  display: inline-flex; align-items: center; gap: 10px;
+  padding: 16px 36px;
+  background: var(--gold);
+  color: var(--v0);
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  text-decoration: none;
+  font-weight: 700;
+  transition: all 0.2s;
+  position: relative;
+  overflow: hidden;
+}
+.btn-primary::after {
+  content: '';
+  position: absolute; inset: 0;
+  background: rgba(255,255,255,0.15);
+  transform: translateX(-100%);
+  transition: transform 0.3s var(--ease);
+}
+.btn-primary:hover::after { transform: translateX(0); }
+
+.btn-ghost {
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--t-dim);
+  text-decoration: none;
+  border-bottom: 1px solid var(--v4);
+  padding-bottom: 2px;
+  transition: color 0.2s, border-color 0.2s;
+}
+.btn-ghost:hover { color: var(--t-bright); border-color: var(--t-dim); }
+
+.hero-stats {
+  display: flex; gap: 48px; flex-wrap: wrap;
+  margin-top: 80px;
+  padding-top: 40px;
+  border-top: 1px solid var(--v3);
+  opacity: 0;
+  animation: fadeUp 0.9s var(--ease) 0.8s forwards;
+  position: relative; z-index: 1;
+}
+.hero-stat-n {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 2.4rem;
+  color: var(--gold);
+  line-height: 1;
+  margin-bottom: 4px;
+}
+.hero-stat-l {
+  font-family: var(--mono);
+  font-size: 0.58rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--t-dim);
+}
+
+/* ── PLATFORMS ── */
+.platforms {
+  padding: 0 48px 100px;
+  position: relative; z-index: 1;
+}
+.platforms-label {
+  font-family: var(--mono);
+  font-size: 0.58rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--t-dim);
+  margin-bottom: 20px;
+}
+.platforms-list {
+  display: flex; gap: 12px; flex-wrap: wrap;
+}
+.plat-pill {
+  padding: 8px 18px;
+  border: 1px solid var(--v4);
+  font-family: var(--mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.1em;
+  color: var(--t-dim);
+  text-transform: uppercase;
+}
+
+/* ── FEATURES ── */
+.features {
+  padding: 100px 48px;
+  border-top: 1px solid var(--v3);
+  position: relative;
+}
+.features-header {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 48px;
+  margin-bottom: 80px;
+  align-items: end;
+}
+.section-tag {
+  font-family: var(--mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 20px;
+}
+.section-tag::before {
+  content: '//';
+  margin-right: 8px;
+  opacity: 0.5;
+}
+.features-h2 {
+  font-family: var(--serif);
+  font-size: clamp(2rem, 4vw, 3.5rem);
+  line-height: 1.05;
+  letter-spacing: -0.03em;
+  color: var(--t-bright);
+}
+.features-h2 em { color: var(--gold); font-style: italic; }
+.features-desc {
+  font-size: 0.95rem;
+  line-height: 1.8;
+  color: var(--t-dim);
+  align-self: end;
+}
+
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
+  background: var(--v3);
+}
+.feature-card {
+  background: var(--v1);
+  padding: 40px 36px;
+  position: relative;
+  overflow: hidden;
+  transition: background 0.3s;
+}
+.feature-card:hover { background: var(--v2); }
+.feature-card::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 1px;
+  background: var(--c, var(--gold));
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.4s var(--ease);
+}
+.feature-card:hover::before { transform: scaleX(1); }
+.feature-icon {
+  font-size: 1.8rem;
+  margin-bottom: 24px;
+  display: block;
+}
+.feature-title {
+  font-family: var(--serif);
+  font-size: 1.3rem;
+  color: var(--t-bright);
+  margin-bottom: 12px;
+  letter-spacing: -0.02em;
+}
+.feature-text {
+  font-size: 0.88rem;
+  line-height: 1.7;
+  color: var(--t-dim);
+}
+
+/* ── HOW IT WORKS ── */
+.how {
+  padding: 100px 48px;
+  border-top: 1px solid var(--v3);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 80px;
+  align-items: center;
+}
+.how-steps { display: flex; flex-direction: column; gap: 0; }
+.how-step {
+  display: flex; gap: 28px;
+  padding: 32px 0;
+  border-bottom: 1px solid var(--v3);
+  position: relative;
+}
+.how-step:first-child { padding-top: 0; }
+.how-step:last-child { border-bottom: none; }
+.step-num {
+  font-family: var(--mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.15em;
+  color: var(--gold);
+  padding-top: 4px;
+  min-width: 32px;
+}
+.step-title {
+  font-family: var(--serif);
+  font-size: 1.15rem;
+  color: var(--t-bright);
+  margin-bottom: 8px;
+  letter-spacing: -0.02em;
+}
+.step-text {
+  font-size: 0.85rem;
+  line-height: 1.7;
+  color: var(--t-dim);
+}
+
+.how-visual {
+  background: var(--v1);
+  border: 1px solid var(--v3);
+  padding: 40px;
+  position: relative;
+  overflow: hidden;
+}
+.how-visual::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg, var(--gold), transparent);
+}
+.score-demo { display: flex; flex-direction: column; gap: 16px; }
+.score-row {
+  display: flex; align-items: center; gap: 16px;
+}
+.score-label {
+  font-family: var(--mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--t-dim);
+  width: 80px;
+  flex-shrink: 0;
+}
+.score-bar-wrap {
+  flex: 1;
+  height: 4px;
+  background: var(--v3);
+  position: relative;
+  overflow: hidden;
+}
+.score-bar {
+  position: absolute; left: 0; top: 0; height: 100%;
+  background: var(--bc, var(--gold));
+  animation: barGrow 1.5s var(--ease) forwards;
+  transform-origin: left;
+}
+@keyframes barGrow {
+  from { width: 0; }
+  to { width: var(--bw, 70%); }
+}
+.score-val {
+  font-family: var(--mono);
+  font-size: 0.65rem;
+  color: var(--t-bright);
+  width: 32px;
+  text-align: right;
+}
+.score-title {
+  font-family: var(--serif);
+  font-size: 1.4rem;
+  color: var(--t-bright);
+  margin-bottom: 8px;
+  letter-spacing: -0.02em;
+}
+.score-meta {
+  font-family: var(--mono);
+  font-size: 0.58rem;
+  letter-spacing: 0.15em;
+  color: var(--t-dim);
+  margin-bottom: 28px;
+  text-transform: uppercase;
+}
+.score-big {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 3.5rem;
+  color: var(--gold);
+  line-height: 1;
+  margin-bottom: 4px;
+}
+.score-verdict {
+  font-family: var(--mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--gold);
+  opacity: 0.7;
+}
+.score-divider { height: 1px; background: var(--v3); margin: 24px 0; }
+
+/* ── USE CASES ── */
+.usecases {
+  padding: 100px 48px;
+  border-top: 1px solid var(--v3);
+}
+.usecases-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
+  margin-top: 60px;
+}
+.usecase {
+  padding: 36px;
+  border: 1px solid var(--v3);
+  position: relative;
+  overflow: hidden;
+  transition: border-color 0.3s;
+}
+.usecase:hover { border-color: var(--v4); }
+.usecase-q {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 1.2rem;
+  color: var(--t-bright);
+  margin-bottom: 16px;
+  line-height: 1.3;
+}
+.usecase-a {
+  font-size: 0.85rem;
+  line-height: 1.7;
+  color: var(--t-dim);
+}
+.usecase-tag {
+  display: inline-block;
+  margin-bottom: 16px;
+  font-family: var(--mono);
+  font-size: 0.55rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--gold);
+  padding: 4px 10px;
+  border: 1px solid rgba(232,197,71,0.3);
+}
+
+/* ── CTA SECTION ── */
+.cta-section {
+  padding: 120px 48px;
+  border-top: 1px solid var(--v3);
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+.cta-section::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse 60% 60% at 50% 50%, rgba(232,197,71,0.05) 0%, transparent 70%);
+  pointer-events: none;
+}
+.cta-h2 {
+  font-family: var(--serif);
+  font-size: clamp(2.5rem, 5vw, 4.5rem);
+  line-height: 1.05;
+  letter-spacing: -0.03em;
+  color: var(--t-bright);
+  margin-bottom: 24px;
+}
+.cta-h2 em { color: var(--gold); font-style: italic; }
+.cta-sub {
+  font-size: 1rem;
+  color: var(--t-dim);
+  margin-bottom: 48px;
+  max-width: 420px;
+  margin-left: auto;
+  margin-right: auto;
+  line-height: 1.7;
+}
+.cta-note {
+  margin-top: 20px;
+  font-family: var(--mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--t-dim);
+}
+
+/* ── FOOTER ── */
+footer {
+  padding: 40px 48px;
+  border-top: 1px solid var(--v3);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+.footer-logo {
+  font-family: var(--serif);
+  font-size: 1rem;
+  color: var(--t-dim);
+  text-decoration: none;
+}
+.footer-logo span { color: var(--gold); }
+.footer-links {
+  display: flex; gap: 32px;
+}
+.footer-links a {
+  font-family: var(--mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--t-dim);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+.footer-links a:hover { color: var(--t-bright); }
+.footer-copy {
+  font-family: var(--mono);
+  font-size: 0.58rem;
+  letter-spacing: 0.1em;
+  color: var(--t-dim);
+  opacity: 0.5;
+}
+
+/* ── ANIMATIONS ── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.reveal {
+  opacity: 0;
+  transform: translateY(32px);
+  transition: opacity 0.8s var(--ease), transform 0.8s var(--ease);
+}
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ── RESPONSIVE ── */
+@media (max-width: 900px) {
+  nav { padding: 16px 24px; }
+  .hero { padding: 100px 24px 60px; }
+  .platforms { padding: 0 24px 60px; }
+  .features { padding: 60px 24px; }
+  .features-header { grid-template-columns: 1fr; gap: 24px; }
+  .features-grid { grid-template-columns: 1fr; }
+  .how { padding: 60px 24px; grid-template-columns: 1fr; gap: 48px; }
+  .usecases { padding: 60px 24px; }
+  .usecases-grid { grid-template-columns: 1fr; }
+  .cta-section { padding: 80px 24px; }
+  footer { padding: 32px 24px; flex-direction: column; align-items: flex-start; }
+  .hero-stats { gap: 32px; }
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="/" class="nav-logo">Stream<span>IQ</span></a>
+  <a href="https://movietracker-swapriya.streamlit.app/" target="_blank" class="nav-cta">
+    Open App ↗
+  </a>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-grid"></div>
+
+  <div class="hero-tag">Free · No Signup · Updated Daily</div>
+
+  <h1 class="hero-h1">
+    Stop scrolling.<br/>
+    Know what's <em>worth</em><br/>
+    watching tonight.
+  </h1>
+
+  <p class="hero-sub">
+    StreamIQ scores every title on Indian OTT using real YouTube reviews, Reddit discussions and Rotten Tomatoes ratings — so you don't have to guess.
+  </p>
+
+  <div class="hero-actions">
+    <a href="https://movietracker-swapriya.streamlit.app/" target="_blank" class="btn-primary">
+      Open StreamIQ — it's free ↗
+    </a>
+    <a href="#features" class="btn-ghost">See how it works</a>
+  </div>
+
+  <div class="hero-stats">
+    <div>
+      <div class="hero-stat-n">5+</div>
+      <div class="hero-stat-l">OTT Platforms</div>
+    </div>
+    <div>
+      <div class="hero-stat-n">900+</div>
+      <div class="hero-stat-l">Titles Tracked</div>
+    </div>
+    <div>
+      <div class="hero-stat-n">Daily</div>
+      <div class="hero-stat-l">Auto-Updated</div>
+    </div>
+    <div>
+      <div class="hero-stat-n">0₹</div>
+      <div class="hero-stat-l">Forever Free</div>
+    </div>
+  </div>
+</section>
+
+<!-- PLATFORMS -->
+<div class="platforms reveal">
+  <div class="platforms-label">Tracks all major Indian OTT platforms</div>
+  <div class="platforms-list">
+    <div class="plat-pill">Netflix</div>
+    <div class="plat-pill">Prime Video</div>
+    <div class="plat-pill">JioHotstar</div>
+    <div class="plat-pill">Apple TV+</div>
+    <div class="plat-pill">JioCinema</div>
+  </div>
+</div>
+
+<!-- FEATURES -->
+<section class="features" id="features">
+  <div class="features-header reveal">
+    <div>
+      <div class="section-tag">What StreamIQ does</div>
+      <h2 class="features-h2">Built for<br/><em>Indian viewers</em></h2>
+    </div>
+    <p class="features-desc">
+      Every feature was designed around one question: what should I watch tonight? We pull from sources Indians actually trust and filter for what actually matters here.
+    </p>
+  </div>
+
+  <div class="features-grid">
+    <div class="feature-card reveal" style="--c:#E8C547">
+      <span class="feature-icon">🎯</span>
+      <div class="feature-title">AI Sentiment Scoring</div>
+      <p class="feature-text">Aggregates YouTube review sentiment, Reddit discussion tone and Rotten Tomatoes critic scores into a single honest number. No marketing fluff.</p>
+    </div>
+    <div class="feature-card reveal" style="--c:#FF7043">
+      <span class="feature-icon">🎙️</span>
+      <div class="feature-title">Hindi Dub Filter</div>
+      <p class="feature-text">Instantly filter to only titles with a confirmed Hindi dub available. Verified live via JustWatch India — not guesswork.</p>
+    </div>
+    <div class="feature-card reveal" style="--c:#4DBFFF">
+      <span class="feature-icon">🔍</span>
+      <div class="feature-title">Discover 900+ Titles</div>
+      <p class="feature-text">Beyond trending — explore Classics, Hidden Gems, Hindi originals and Genre Picks across all platforms. Direct streaming links included.</p>
+    </div>
+    <div class="feature-card reveal" style="--c:#B88EFF">
+      <span class="feature-icon">⚡</span>
+      <div class="feature-title">Polarising Picks</div>
+      <p class="feature-text">Know before you watch — some titles divide audiences sharply. StreamIQ flags polarising content so you go in with the right expectations.</p>
+    </div>
+    <div class="feature-card reveal" style="--c:#00F5C4">
+      <span class="feature-icon">🔗</span>
+      <div class="feature-title">Direct Stream Links</div>
+      <p class="feature-text">One click opens the title on the right platform. No searching, no confusion about which app has it. Works on mobile too.</p>
+    </div>
+    <div class="feature-card reveal" style="--c:#FF4455">
+      <span class="feature-icon">📺</span>
+      <div class="feature-title">LG TV Copy Title</div>
+      <p class="feature-text">Using an LG TV? Copy any title to clipboard with one tap and search directly on your remote. Designed for the couch experience.</p>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="how" id="how">
+  <div class="how-steps reveal">
+    <div class="section-tag">How it works</div>
+    <div class="how-step">
+      <div class="step-num">01</div>
+      <div>
+        <div class="step-title">Data is pulled daily</div>
+        <p class="step-text">Every 24 hours, StreamIQ pulls trending and curated titles from TMDb across Netflix, Prime, JioHotstar, Apple TV+ and JioCinema for India.</p>
+      </div>
+    </div>
+    <div class="how-step">
+      <div class="step-num">02</div>
+      <div>
+        <div class="step-title">Reviews are analysed</div>
+        <p class="step-text">YouTube review videos are fetched and sentiment-scored. Reddit threads are parsed. Rotten Tomatoes critic scores are pulled. All weighted and combined.</p>
+      </div>
+    </div>
+    <div class="how-step">
+      <div class="step-num">03</div>
+      <div>
+        <div class="step-title">Hindi dubs are verified</div>
+        <p class="step-text">JustWatch India's API is queried for every title to confirm whether a Hindi audio track actually exists — not just assumed from the title language.</p>
+      </div>
+    </div>
+    <div class="how-step">
+      <div class="step-num">04</div>
+      <div>
+        <div class="step-title">You get a clear answer</div>
+        <p class="step-text">Open StreamIQ, see the score, read the verdict, click Watch. The whole thing takes 10 seconds.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="how-visual reveal">
+    <div class="score-title">Severance</div>
+    <div class="score-meta">Apple TV+ · Series · 2022</div>
+    <div class="score-big">84</div>
+    <div class="score-verdict">Worth Watching</div>
+    <div class="score-divider"></div>
+    <div class="score-demo">
+      <div class="score-row">
+        <div class="score-label">YouTube</div>
+        <div class="score-bar-wrap">
+          <div class="score-bar" style="--bw:88%;--bc:#FF4040"></div>
+        </div>
+        <div class="score-val">88</div>
+      </div>
+      <div class="score-row">
+        <div class="score-label">Reddit</div>
+        <div class="score-bar-wrap">
+          <div class="score-bar" style="--bw:79%;--bc:#FF7A30;animation-delay:0.2s"></div>
+        </div>
+        <div class="score-val">79</div>
+      </div>
+      <div class="score-row">
+        <div class="score-label">IMDb</div>
+        <div class="score-bar-wrap">
+          <div class="score-bar" style="--bw:85%;--bc:#E8C547;animation-delay:0.4s"></div>
+        </div>
+        <div class="score-val">85</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- USE CASES -->
+<section class="usecases">
+  <div class="reveal">
+    <div class="section-tag">Who it's for</div>
+    <h2 class="features-h2" style="font-size:clamp(1.8rem,3.5vw,3rem);margin-top:12px">
+      Every kind of <em>viewer</em>
+    </h2>
+  </div>
+  <div class="usecases-grid">
+    <div class="usecase reveal">
+      <div class="usecase-tag">Family nights</div>
+      <div class="usecase-q">"We want something everyone can watch — in Hindi."</div>
+      <p class="usecase-a">Use the Hindi Dub filter + All Platforms to find universally enjoyable titles the whole family can follow without subtitles.</p>
+    </div>
+    <div class="usecase reveal">
+      <div class="usecase-tag">Solo binge</div>
+      <div class="usecase-q">"I have 3 hours. What's actually good right now?"</div>
+      <p class="usecase-a">The Watch Now tab shows this week's trending titles scored by real viewer sentiment — not just what the algorithm is pushing.</p>
+    </div>
+    <div class="usecase reveal">
+      <div class="usecase-tag">Cinephile</div>
+      <div class="usecase-q">"I've seen everything obvious. What am I missing?"</div>
+      <p class="usecase-a">The Hidden Gems category surfaces underrated titles with high scores but low mainstream visibility across all Indian platforms.</p>
+    </div>
+    <div class="usecase reveal">
+      <div class="usecase-tag">Indecisive</div>
+      <div class="usecase-q">"My partner and I can never agree on what to watch."</div>
+      <p class="usecase-a">Filter by platform you both subscribe to, pick a genre, sort by score. The argument ends in 30 seconds.</p>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section">
+  <h2 class="cta-h2 reveal">Ready to watch<br/><em>better</em>?</h2>
+  <p class="cta-sub reveal">No account. No subscription. Just open it and find something worth watching tonight.</p>
+  <div class="reveal">
+    <a href="https://movietracker-swapriya.streamlit.app/" target="_blank" class="btn-primary">
+      Open StreamIQ free ↗
+    </a>
+    <div class="cta-note">Updated daily · Works on mobile · No signup</div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <a href="/" class="footer-logo">Stream<span>IQ</span></a>
+  <div class="footer-links">
+    <a href="https://movietracker-swapriya.streamlit.app/" target="_blank">Launch App</a>
+    <a href="#features">Features</a>
+    <a href="#how">How It Works</a>
+  </div>
+  <div class="footer-copy">© 2026 StreamIQ · Built for Indian viewers</div>
+</footer>
+
+<script>
+// Scroll reveal
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach((entry, i) => {
+    if (entry.isIntersecting) {
+      setTimeout(() => entry.target.classList.add('visible'), i * 60);
+      observer.unobserve(entry.target);
+    }
+  });
+}, { threshold: 0.1 });
+
+document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+</script>
+
+</body>
+</html>
